@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Incident Response Log{% endblock %}
+{% block content %}
+
+<div class="card">
+  <h1>Automated Incident Response Log</h1>
+  <p class="subtitle">Actions the system took automatically in response to security alerts.</p>
+</div>
+
+<div class="card">
+  <table>
+    <tr><th>ID</th><th>Alert ID</th><th>Action</th><th>Details</th><th>Time</th></tr>
+    {% for i in incidents %}
+    <tr>
+      <td>{{ i.id }}</td>
+      <td>{{ i.alert_id }}</td>
+      <td>
+        {% if i.action_type == 'session_terminated' %}<span class="badge high">Session Terminated</span>
+        {% elif i.action_type == 'account_locked' %}<span class="badge critical">Account Locked</span>
+        {% else %}<span class="badge medium">Admin Notified</span>{% endif %}
+      </td>
+      <td class="small-muted">{{ i.details or "-" }}</td>
+      <td class="small-muted">{{ i.timestamp }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+{% endblock %}

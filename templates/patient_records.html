@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Patient Records{% endblock %}
+{% block content %}
+
+{% if bulk_export_notice %}
+<div class="card">
+  <span class="feature-tag">FEATURE · CONTINUOUS AUTHENTICATION (UEBA)</span>
+  <h2>Bulk Export Simulated</h2>
+  <p>You just accessed {{ records|length }} patient records in a single request - a pattern that deviates
+     sharply from typical clinical browsing. Behavioral deviation score:
+     <strong>{{ deviation.deviation_score }}/100</strong>
+     {% if deviation.flag %}<span class="badge high">Flagged</span>{% else %}<span class="badge low">Not yet flagged</span>{% endif %}
+  </p>
+  {% if risk %}
+  <p>Live mid-session risk score: <strong>{{ risk.final_score }}/100</strong>
+     <span class="badge {{ risk.level }}">{{ risk.level }}</span>
+  </p>
+  {% endif %}
+  {% if terminated %}
+    <div class="alert-banner error">
+      ⚠ Your session has been automatically terminated by the incident response system due to critical anomalous
+      activity. You will need to log in again. This action and the full SHAP explanation are visible to admins
+      on the Alerts and Incidents pages.
+    </div>
+  {% elif risk and risk.should_alert %}
+    <div class="alert-banner warning">
+      A security alert with a SHAP explanation has been raised for this activity and is now visible to admins.
+    </div>
+  {% else %}
+    <p class="small-muted">If your risk score crosses the auto-terminate threshold, an admin will see a
+       high-risk alert with a full SHAP explanation on the Alerts page, and your session may be terminated automatically.</p>
+  {% endif %}
+</div>
+{% endif %}
+
+<div class="card">
+  <h2>{{ "Patient Record" if single else "Patient Records" }}</h2>
+  <table>
+    <tr><th>ID</th><th>Patient</th><th>Diagnosis</th><th>Notes</th></tr>
+    {% for r in records %}
+    <tr>
+      <td>{{ r.id }}</td>
+      <td>{{ r.patient_name }}</td>
+      <td>{{ r.diagnosis }}</td>
+      <td>{{ r.sensitive_notes }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <p style="margin-top:16px;"><a class="btn secondary" href="{{ url_for('main.dashboard') }}">Back to Dashboard</a></p>
+</div>
+
+{% endblock %}

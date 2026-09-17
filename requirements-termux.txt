@@ -1,0 +1,17 @@
+# Termux-safe deps (actually installed & verified 2026-09-17).
+# Full pinned requirements.txt needs scikit-learn/shap/pandas which have
+# no Python 3.14 Android wheels and time out building on-device.
+# The app auto-falls back to rule-based risk + rule explanations when
+# sklearn/shap are absent (see risk_engine.py / explainability.py patches).
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+Flask-JWT-Extended==4.6.0
+Flask-Bcrypt==1.0.1
+python-dotenv==1.0.1
+joblib==1.4.2
+# numpy comes from Termux pkg (python-numpy 2.4.4), inherited via
+# venv --system-site-packages. Do NOT pip install numpy on Termux.
+
+# --- Full ML mode (PC only) ---
+# pip install scikit-learn==1.5.1 shap==0.46.0 pandas==2.2.2 numpy==1.26.4
+# python seed_db.py   # retrains ml_models/

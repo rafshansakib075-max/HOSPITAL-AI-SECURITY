@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Users{% endblock %}
+{% block content %}
+
+<div class="card">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <h1 style="margin:0;">Users</h1>
+    <a class="btn" href="{{ url_for('auth.register') }}">+ New User</a>
+  </div>
+</div>
+
+<div class="card">
+  <table>
+    <tr><th>ID</th><th>Username</th><th>Role</th><th>Status</th><th>Failed Attempts</th><th>Last Login</th><th></th></tr>
+    {% for u in users %}
+    <tr>
+      <td>{{ u.id }}</td>
+      <td>{{ u.username }}</td>
+      <td>{{ u.role.name }}</td>
+      <td>
+        {% if u.is_locked %}<span class="badge high">Locked</span>{% else %}<span class="badge low">Active</span>{% endif %}
+      </td>
+      <td>{{ u.failed_login_attempts }}</td>
+      <td>{{ u.last_login or "-" }}</td>
+      <td>
+        {% if u.is_locked %}
+        <form method="POST" action="{{ url_for('main.unlock_user', user_id=u.id) }}">
+          <button class="btn secondary" type="submit">Unlock</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+{% endblock %}

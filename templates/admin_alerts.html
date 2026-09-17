@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Security Alerts{% endblock %}
+{% block content %}
+
+<div class="card">
+  <span class="feature-tag">FEATURE · EXPLAINABLE AI (XAI) RISK DASHBOARD</span>
+  <h1>Security Alerts</h1>
+  <p class="subtitle">Every alert below shows a SHAP-based breakdown of exactly which factors drove the AI's risk score - not just a number.</p>
+</div>
+
+{% for item in alerts %}
+<div class="card">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+      <strong>{{ item.username }}</strong> &nbsp;·&nbsp; {{ item.alert.alert_type.replace('_',' ')|title }}
+      <div class="small-muted">{{ item.alert.created_at }}</div>
+    </div>
+    <div>
+      <span class="badge {{ item.alert.status }}">{{ item.alert.status }}</span>
+      <span class="badge {{ 'critical' if item.alert.risk_score >= 80 else 'high' if item.alert.risk_score >= 60 else 'medium' }}">
+        risk {{ item.alert.risk_score }}/100
+      </span>
+    </div>
+  </div>
+
+  <h2 style="margin-top:18px; font-size:15px;">Why this alert was raised (SHAP feature attribution)</h2>
+  {% for c in item.explanation %}
+  <div class="explain-bar-row">
+    <div class="explain-label">{{ c.label }}</div>
+    <div class="explain-bar-track">
+      <div class="explain-bar-fill {{ 'negative' if c.impact_pct < 0 else '' }}"
+           style="width: {{ [c.impact_pct|abs, 100]|min }}%;"></div>
+    </div>
+    <div class="explain-pct">{{ c.impact_pct }}%</div>
+  </div>
+  {% endfor %}
+
+  {% if item.alert.status == 'open' %}
+  <form method="POST" action="{{ url_for('main.resolve_alert', alert_id=item.alert.id) }}" style="margin-top:14px;">
+    <input type="hidden" name="status" value="resolved">
+    <button class="btn" type="submit">Mark Resolved</button>
+    <button class="btn secondary" type="submit" formaction="{{ url_for('main.resolve_alert', alert_id=item.alert.id) }}"
+            onclick="this.form.status.value='false_positive'">Mark False Positive</button>
+  </form>
+  {% else %}
+  <p class="small-muted" style="margin-top:10px;">Resolved by {{ item.alert.resolved_by }} at {{ item.alert.resolved_at }}</p>
+  {% endif %}
+</div>
+{% else %}
+<div class="card"><p>No alerts yet. Try the bulk export demo from the dashboard to trigger one.</p></div>
+{% endfor %}
+
+{% endblock %}

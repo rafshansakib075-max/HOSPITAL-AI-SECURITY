@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Hospital AI Security</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-box">
+      <h1>🛡 Hospital AI Security</h1>
+      <p>AI-based Insider Threat &amp; Anomaly Detection System</p>
+
+      {% if error %}
+        <div class="alert-banner error">{{ error }}</div>
+      {% endif %}
+
+      <form method="POST" action="{{ url_for('auth.login') }}">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" name="username" required autofocus>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" name="password" required>
+        </div>
+        <button class="btn" type="submit" style="width:100%;">Sign In</button>
+      </form>
+
+      <p class="small-muted" style="margin-top:18px;">
+        Demo accounts:<br>
+        admin1 / Admin@1234 &nbsp;·&nbsp; dr_rahim / Doctor@1234<br>
+        nurse_akter / Nurse@1234 &nbsp;·&nbsp; staff_hasan / Staff@1234
+      </p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+<div class="card">
+  <h1>Welcome, {{ user.username }}</h1>
+  <p class="subtitle">Role: {{ user.role.name }} &nbsp;·&nbsp; Every action you take on this page is written to the immutable audit log.</p>
+</div>
+
+<div class="card">
+  <span class="feature-tag">FEATURE · CONTINUOUS AUTHENTICATION (UEBA)</span>
+  <h2>Your Live Behavioral Status</h2>
+  {% if deviation.baseline_ready %}
+    <p>
+      Deviation from your normal behavior baseline:
+      <strong>{{ deviation.deviation_score }}/100</strong>
+      {% if deviation.flag %}
+        <span class="badge high">Unusual activity detected</span>
+      {% else %}
+        <span class="badge low">Normal</span>
+      {% endif %}
+    </p>
+    <ul>
+      {% for r in deviation.reasons %}
+        <li class="small-muted">{{ r }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="small-muted">{{ deviation.reasons[0] }}</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>Patient Records</h2>
+  <table>
+    <tr><th>ID</th><th>Patient</th><th>Diagnosis</th><th></th></tr>
+    {% for r in records %}
+    <tr>
+      <td>{{ r.id }}</td>
+      <td>{{ r.patient_name }}</td>
+      <td>{{ r.diagnosis }}</td>
+      <td><a class="btn secondary" href="{{ url_for('main.view_record', record_id=r.id) }}">View</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+  <p class="small-muted" style="margin-top:14px;">
+    Want to see the anomaly detection engine react in real time? Try the
+    <a href="{{ url_for('main.bulk_export_demo') }}">bulk export demo</a> to simulate suspicious rapid record access.
+  </p>
+</div>
+
+{% endblock %}

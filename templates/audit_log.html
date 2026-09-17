@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Audit Log{% endblock %}
+{% block content %}
+
+<div class="card">
+  <h1>Immutable Audit Log</h1>
+  {% if is_valid %}
+    <div class="alert-banner notice">✅ Hash chain integrity verified - no tampering detected across {{ logs|length }} recent entries.</div>
+  {% else %}
+    <div class="alert-banner error">⚠ Hash chain broken at entry #{{ broken_id }} - possible tampering detected!</div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <table>
+    <tr><th>ID</th><th>User</th><th>Action</th><th>Resource</th><th>IP</th><th>Time</th><th>Hash</th></tr>
+    {% for log in logs %}
+    <tr>
+      <td>{{ log.id }}</td>
+      <td>{{ log.username_snapshot }}</td>
+      <td>{{ log.action }}</td>
+      <td class="small-muted">{{ log.resource or "-" }}</td>
+      <td>{{ log.ip_address or "-" }}</td>
+      <td class="small-muted">{{ log.timestamp }}</td>
+      <td><code class="hash">{{ log.curr_hash[:12] }}...</code></td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+{% endblock %}
