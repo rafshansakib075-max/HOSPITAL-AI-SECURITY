@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
-
 import os
+import sys
 
 from config import Config
 from extensions import db, jwt, bcrypt, JWT_BLOCKLIST
@@ -14,9 +14,6 @@ def create_app(config_class=Config):
     jwt.init_app(app)
     bcrypt.init_app(app)
 
-    # --- JWT blocklist: lets us instantly revoke a session (e.g. when the
-    # incident response module auto-terminates a high-risk session) even
-    # though the token itself has not expired yet.
     @jwt.token_in_blocklist_loader
     def check_if_token_revoked(jwt_header, jwt_payload):
         return jwt_payload.get("jti") in JWT_BLOCKLIST
@@ -41,10 +38,6 @@ def create_app(config_class=Config):
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
 
-    # Makes `user` available in EVERY template automatically (base.html's nav
-    # bar depends on it). Without this, any route that forgets to pass
-    # user=... to render_template() silently loses the top navigation menu -
-    # which is exactly the bug this fixes.
     @app.context_processor
     def inject_current_user():
         from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
@@ -59,24 +52,25 @@ def create_app(config_class=Config):
         return {"user": None}
 
     with app.app_context():
-        db.create_all()
-        # Ephemeral hosts (Vercel serverless) start with an empty database
-        # on every cold start -> auto-seed demo data when opted in.
-        # Local installs are unaffected (AUTO_SEED is unset).
-        if os.environ.get("AUTO_SEED") == "1":
-            try:
-                from seed_slim import seed_patient_records, seed_roles_and_users
-                seed_roles_and_users()
-                seed_patient_records()
-            except Exception:
-                pass
+        try:
+            db.create_all()
+        except Exception as e:
+            print(f"Database creation failed: {e}", file=sys.stderr)
+            pass
 
     return app
 
 
 app = create_app()
 
+@app.errorhandler(Exception)
+def handle_error(e):
+    print(f"Unhandled exception: {e}", file=sys.stderr)
+    import traceback
+    traceback.print_exc(file=sys.stderr)
+    return jsonify({"error": "Internal server error"}), 500
+
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8002))
-    debug = os.environ.get("FLASK_DEBUG", "1") == "1"
+    port = int(os.environ.get("PORT", 8000))
+    debug = os.environ.get("FLASK_DEBUG", "0") == "1"
     app.run(host="0.0.0.0", debug=debug, port=port)
