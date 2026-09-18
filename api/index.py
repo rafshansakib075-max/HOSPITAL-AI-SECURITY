@@ -27,6 +27,29 @@ os.environ.setdefault("FLASK_DEBUG", "0")
 
 from app import app  # noqa: E402  (env must be set before import)
 
+
+class StripApiPrefixMiddleware:
+    """Vercel's rewrite forwards the REWRITTEN path (/api/index/...) to the
+    function instead of the original URL, so Flask sees /api/index/login
+    and 404s. Strip that prefix back off before Flask routes the request.
+    Browser-visible URLs are unaffected (redirects still use real paths).
+    """
+
+    def __init__(self, wsgi_app, prefix="/api/index"):
+        self.wsgi_app = wsgi_app
+        self.prefix = prefix
+
+    def __call__(self, environ, start_response):
+        path = environ.get("PATH_INFO", "")
+        if path == self.prefix:
+            environ["PATH_INFO"] = "/"
+        elif path.startswith(self.prefix + "/"):
+            environ["PATH_INFO"] = path[len(self.prefix):]
+        return self.wsgi_app(environ, start_response)
+
+
+app.wsgi_app = StripApiPrefixMiddleware(app.wsgi_app)
+
 with app.app_context():
     from seed_slim import seed_patient_records, seed_roles_and_users
 
