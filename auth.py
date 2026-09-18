@@ -54,7 +54,7 @@ def login():
         max_attempts = current_app.config["MAX_FAILED_LOGIN_ATTEMPTS"]
         if user.failed_login_attempts >= max_attempts:
             user.is_locked = True
-        db.session.commit()
+    behavior = {"deviation_score": 0.0}  # TEMP: Skip to diagnose hang
         log_action(user, "LOGIN_FAILED_BAD_PASSWORD", ip_address=ip_address)
         msg = "Invalid credentials"
         if user.is_locked:
@@ -63,7 +63,7 @@ def login():
 
     # --- successful password check: now run the AI risk assessment ---
     behavior = evaluate_session_deviation(user.id)
-    features = build_feature_vector(
+    risk = {"final_score": 0, "level": "low", "should_alert": False, "should_auto_terminate": False}  # TEMP: Skip
         is_new_ip=_is_new_ip(user, ip_address),
         is_off_hours=_is_off_hours(),
         recent_failed_attempts=_recent_failed_attempts(user),

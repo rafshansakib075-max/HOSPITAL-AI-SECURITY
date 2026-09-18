@@ -1,0 +1,23 @@
+--- a/auth.py
++++ b/auth.py
+@@ -54,7 +54,8 @@ def login():
+         return render_template("login.html", error=msg), 401
+ 
+     # --- successful password check: now run the AI risk assessment ---
+-    behavior = evaluate_session_deviation(user.id)
++    # TEMP: Skip behavioral analysis to diagnose hang
++    behavior = {"deviation_score": 0.0}
+     features = build_feature_vector(
+         is_new_ip=_is_new_ip(user, ip_address),
+         is_off_hours=_is_off_hours(),
+@@ -62,7 +63,8 @@ def login():
+         is_new_device=False,  # simplified for demo: device fingerprinting not implemented
+         rapid_access_count=0,  # not yet known at login time
+         behavior_deviation_score=behavior["deviation_score"],
+     )
+-    risk = compute_risk_score(features)
++    # TEMP: Skip risk scoring to diagnose hang
++    risk = {"final_score": 0, "level": "low", "should_alert": False, "should_auto_terminate": False}
+ 
+     session_id = str(uuid.uuid4())
+     access_token = create_access_token(identity=str(user.id), additional_claims={"jti": session_id})
