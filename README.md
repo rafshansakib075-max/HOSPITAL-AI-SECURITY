@@ -65,15 +65,21 @@ Requires Python 3.10+.
 python -m venv venv
 venv\Scripts\activate
 
-# 2. Install dependencies
+# 2. Install dependencies (slim set: Flask stack only, rule-based risk mode)
 pip install -r requirements.txt
+
+# ...or the full AI stack on a PC/server with plenty of disk:
+# pip install -r requirements-ml.txt
 
 # 3. Configure environment
 copy .env.example .env
 
 
-# 4. Seed the database, demo users, patient records, and train the ML models
-python seed_db.py
+# 4. Seed the database, demo users and patient records
+python seed_slim.py
+
+# ...or, with the full ML stack installed, also train the ML models:
+# python seed_db.py
 
 # 5. Run the app
 python app.py

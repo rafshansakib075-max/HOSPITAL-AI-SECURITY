@@ -1,0 +1,15 @@
+# Full ML stack for PC / Render / VPS (needs ~500MB disk).
+# Install with: pip install -r requirements-ml.txt
+# then train models with: python seed_db.py
+# (Vercel + quota-limited hosts use the slim requirements.txt instead,
+#  with rule-based risk mode and seed_slim.py)
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+Flask-JWT-Extended==4.6.0
+Flask-Bcrypt==1.0.1
+python-dotenv==1.0.1
+scikit-learn==1.5.1
+shap==0.46.0
+pandas==2.2.2
+numpy==1.26.4
+joblib==1.4.2
