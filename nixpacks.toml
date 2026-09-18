@@ -1,0 +1,14 @@
+# Railway / Nixpacks build config.
+# Pins the start command explicitly so a stale auto-detected command
+# (e.g. one containing an unexpanded $PORT) can never be used.
+# NOTE: if a custom Start Command is also saved in the Railway dashboard
+# (Service -> Settings -> Deploy), the dashboard value wins and must be
+# cleared/changed there.
+[phases.setup]
+nixPkgs = ["python311"]
+
+[phases.install]
+cmds = ["pip install --no-cache-dir -r requirements.txt"]
+
+[start]
+cmd = "gunicorn app:app"
