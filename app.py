@@ -60,6 +60,16 @@ def create_app(config_class=Config):
 
     with app.app_context():
         db.create_all()
+        # Ephemeral hosts (Vercel serverless) start with an empty database
+        # on every cold start -> auto-seed demo data when opted in.
+        # Local installs are unaffected (AUTO_SEED is unset).
+        if os.environ.get("AUTO_SEED") == "1":
+            try:
+                from seed_slim import seed_patient_records, seed_roles_and_users
+                seed_roles_and_users()
+                seed_patient_records()
+            except Exception:
+                pass
 
     return app
 

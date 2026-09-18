@@ -2,6 +2,7 @@
   "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }],
   "env": {
     "FLASK_DEBUG": "0",
-    "JWT_COOKIE_SECURE": "True"
+    "JWT_COOKIE_SECURE": "True",
+    "AUTO_SEED": "1"
   }
 }
