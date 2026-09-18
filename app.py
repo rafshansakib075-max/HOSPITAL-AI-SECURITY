@@ -53,7 +53,14 @@ def create_app(config_class=Config):
 
     with app.app_context():
         try:
-            db.create_all()
+            from sqlalchemy import inspect
+
+            inspector = inspect(db.engine)
+            existing_tables = set(inspector.get_table_names())
+            expected_tables = set(db.metadata.tables.keys())
+
+            if not expected_tables.issubset(existing_tables):
+                db.create_all()
         except Exception as e:
             print(f"Database creation failed: {e}", file=sys.stderr)
             pass
