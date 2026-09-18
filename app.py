@@ -55,15 +55,28 @@ def create_app(config_class=Config):
         try:
             db.create_all()
         except Exception as e:
+            # Gunicorn boots several workers at once; they can race to
+            # CREATE the same SQLite tables on a fresh volume. The loser
+            # hits "table already exists" - harmless, tables are there.
             print(f"Database creation failed: {e}", file=sys.stderr)
-            pass
+            db.session.rollback()
+        # Ephemeral hosts (Vercel serverless) start with an empty database
+        # on every cold start -> auto-seed demo data when opted in.
+        # Local installs are unaffected (AUTO_SEED is unset).
+        if os.environ.get("AUTO_SEED") == "1":
+            try:
+                from seed_slim import seed_patient_records, seed_roles_and_users
+                seed_roles_and_users()
+                seed_patient_records()
+            except Exception:
+                pass
 
     return app
 
 
 app = create_app()
 
-@app.errorhandler(Exception)
+@app.errorhandler(500)
 def handle_error(e):
     print(f"Unhandled exception: {e}", file=sys.stderr)
     import traceback
