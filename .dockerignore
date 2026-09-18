@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pyc
+*.db
+.env
+instance/
+ml_models/
+.git/
+.gitignore
