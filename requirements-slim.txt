@@ -1,0 +1,11 @@
+# Slim dependencies: Flask stack only (~30MB installed).
+# For disk-quota-limited free hosts (e.g. PythonAnywhere Beginner).
+# The app auto-detects missing numpy/joblib/sklearn/shap and runs in
+# rule-based risk mode with rule-weight explanations.
+# Seed with: python seed_slim.py   (NOT seed_db.py, which needs sklearn)
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+Flask-JWT-Extended==4.6.0
+Flask-Bcrypt==1.0.1
+python-dotenv==1.0.1
+joblib==1.4.2

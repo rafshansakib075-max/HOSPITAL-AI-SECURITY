@@ -18,8 +18,14 @@ alert instead of treating the AI as a black box.
 """
 import os
 
-import joblib
-import numpy as np
+try:
+    import joblib
+except ImportError:  # minimal installs: fallback explanation used
+    joblib = None
+try:
+    import numpy as np
+except ImportError:  # minimal installs: fallback explanation used
+    np = None
 try:
     import shap
 except ImportError:  # optional on minimal installs (e.g. Termux); fallback used
@@ -45,6 +51,8 @@ def _surrogate_path():
 
 
 def load_surrogate_model():
+    if joblib is None:
+        return None
     path = _surrogate_path()
     if os.path.exists(path):
         try:
@@ -64,7 +72,7 @@ def explain_risk(features: dict, top_k: int = 4):
     model = load_surrogate_model()
     x = _vector_to_array(features)
 
-    if model is None or shap is None:
+    if model is None or shap is None or np is None:
         return _fallback_explanation(features, top_k)
 
     explainer = shap.TreeExplainer(model)

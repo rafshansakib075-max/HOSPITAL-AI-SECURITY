@@ -10,8 +10,14 @@ deviation score feeds into as one of the inputs.
 import os
 from datetime import datetime
 
-import joblib
-import numpy as np
+try:
+    import joblib
+except ImportError:  # minimal installs: ML disabled, rules only
+    joblib = None
+try:
+    import numpy as np
+except ImportError:  # minimal installs: pure-python fallback below
+    np = None
 from flask import current_app
 
 FEATURE_NAMES = [
@@ -31,6 +37,8 @@ def _model_path():
 
 
 def load_isolation_forest():
+    if joblib is None:
+        return None
     path = _model_path()
     if os.path.exists(path):
         try:
@@ -61,7 +69,10 @@ def build_feature_vector(
 
 
 def _vector_to_array(features: dict):
-    return np.array([[features[name] for name in FEATURE_NAMES]], dtype=float)
+    row = [features[name] for name in FEATURE_NAMES]
+    if np is not None:
+        return np.array([row], dtype=float)
+    return [row]  # pure-python fallback for minimal installs
 
 
 # Rule weights: max contribution each feature can add to the 0-100 rule score
@@ -95,7 +106,7 @@ def anomaly_score(features: dict) -> float:
     # decision_function: higher = more normal. Flip and rescale to 0-100.
     raw = model.decision_function(x)[0]
     scaled = (0.5 - raw) * 100  # empirically raw is roughly in [-0.3, 0.3]
-    return float(np.clip(scaled, 0, 100))
+    return float(max(0.0, min(100.0, scaled)))
 
 
 def compute_risk_score(features: dict) -> dict:
